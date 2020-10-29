@@ -52,6 +52,26 @@
     - 需要用数组包起来
 - 万能API：db.collectionName.insert()
 
+```shell
+
+
+
+#添加两万条数据
+for(var i=0;i<20000;i++){
+	db.users.insert({username:'liu'+i}) #需要执行20000次数据库的添加操作
+}
+db.users.find().count()//20000
+
+
+#优化：
+var arr=[];
+for(var i=0;i<20000;i++){
+	arr.push({username:'liu'+i})
+}
+db.user.insert(arr) #只需执行1次数据库的添加操作，可以节约很多时间
+
+```
+
 
 
 ### 查询数据
@@ -77,6 +97,49 @@
 
 
 
+
+
+```shell
+# mongodb支持直接通过内嵌文档的属性值进行查询
+# 什么是内嵌文档：hobby就属于内嵌文档
+{
+	name:'liu',
+	hobby:{
+		movies:['movie1','movie2'],
+		cities:['zhuhai','chengdu']
+	}
+}
+
+db.users.find({hobby.movies:'movie1'}) //错误
+db.users.find({"hobby.movies":'movie1'})//此时查询的属性名必须加上引号
+
+
+
+#查询操作符的使用
+#比较操作符
+$gt 大于
+$gte 大于等于
+$lt 小于
+$lte 小于等于
+$ne 不等于
+$eq 等于的另一种写法
+
+db.users.find({num:{$gt:200}}) #大于200
+db.users.find({num:{$gt:200,$lt:300}}) #大于200小于300
+
+
+
+#分页查询
+db.users.find().skip(页码-1 * 每页显示的条数).limit(每页显示的条数)
+
+db.users.find().limit(10) #前10条数据
+db.users.find().skip(50).limit(10) #跳过前50条数据，即查询的是第61-70条数据，即第6页的数据
+
+
+```
+
+
+
 ### 修改数据
 
 ```shell
@@ -86,7 +149,7 @@
 > db.students.update({_id:'222'},{name:'kang'})
 
 
-# 2.修改对应的属性
+# 2.修改对应的属性，需要用到修改操作符，比如$set,$unset,$push,$addToSet
 db.collectionName.update(
 	# 查询条件
 	{_id:222},
@@ -98,7 +161,7 @@ db.collectionName.update(
 		}
 		#删除对应的属性
 		$unset:{
-			gender:1
+			gender:1 //这里的1可以随便改为其他的值，无影响
 		}
 		
 	}
@@ -115,6 +178,16 @@ db.students.updateMany(
 		}
 	}
 )
+
+
+# 4.向数组中添加数据
+db.users.update({username:'liu'},{$push:{"hobby.movies":'movie4'}})
+
+#如果数据已经存在，则不会添加
+db.users.update({username:'liu'},{$addToSet:{"hobby.movies":'movie4'}})
+
+
+
 ```
 
 
@@ -141,7 +214,58 @@ db.collection.drop()
 db.dropDatabase()
 
 # 7.注意：删除某一个文档的属性，应该用update。   remove以及delete系列删除的是整个文档
+
+# 8.当删除的条件为内嵌的属性时：
+db.users.remove({"hobby.movies":'movie3'})
 ```
+
+
+
+## 文档之间的关系：
+
+一对一
+
+一对多
+
+```shell
+#用户与订单：
+db.users.insert([
+{_id:100,username:'liu1'},
+{_id:101,username:'liu2'}
+])
+db.orders.insert([
+{list:['apple','banana'],user_id:100},
+{list:['apple','banana2'],user_id:100},
+{list:['apple'],user_id:101}
+])
+
+查询liu1的所有订单：
+首先获取liu1的id: var user_id=db.users.find({name:'liu1'});
+根据id从订单集合中查询对应的订单： db.orders.find({user_id:user_id})
+
+```
+
+多对多
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
