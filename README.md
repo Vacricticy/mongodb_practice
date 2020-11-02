@@ -79,12 +79,12 @@ db.user.insert(arr) #只需执行1次数据库的添加操作，可以节约很�
 - db.collectionName.find() 或db.collectionName.find({}) 
 
   - 查询集合所有的文档，即所有的数据。
-  - 查询到的是整个数组对象。在最外层是有一个对象包裹起来的。
+  - 查询到的是整个**数组**对象。在最外层是有一个对象包裹起来的。
   - db.collectionName.count()或db.collectionName.length()   统计文档个数
 
 - db.collectionName.find({_id:222}) 
 
-  - 条件查询
+  - 条件查询。注意：结果返回的是一个**数组**
 
 - db.collectionName.findOne() 返回的是查询到的对象数组中的第一个对象
 
@@ -100,7 +100,7 @@ db.user.insert(arr) #只需执行1次数据库的添加操作，可以节约很�
 
 
 ```shell
-# mongodb支持直接通过内嵌文档的属性值进行查询
+# 1.mongodb支持直接通过内嵌文档的属性值进行查询
 # 什么是内嵌文档：hobby就属于内嵌文档
 {
 	name:'liu',
@@ -115,7 +115,7 @@ db.users.find({"hobby.movies":'movie1'})//此时查询的属性名必须加上�
 
 
 
-#查询操作符的使用
+#2.查询操作符的使用
 #比较操作符
 $gt 大于
 $gte 大于等于
@@ -127,13 +127,35 @@ $eq 等于的另一种写法
 db.users.find({num:{$gt:200}}) #大于200
 db.users.find({num:{$gt:200,$lt:300}}) #大于200小于300
 
+$or 或者
+db.users.find(
+    {
+        $or:[
+            {num:{$gt:300}},
+            {num:{$lt:200}}
+        ]
+    }
+) #大于300或小于200
 
 
-#分页查询
+#3.分页查询
 db.users.find().skip(页码-1 * 每页显示的条数).limit(每页显示的条数)
 
 db.users.find().limit(10) #前10条数据
 db.users.find().skip(50).limit(10) #跳过前50条数据，即查询的是第61-70条数据，即第6页的数据
+
+
+#4.排序
+db.emp.find().sort({sal:1}) #1表示升序排列，-1表示降序排列
+db.emp.find().sort({sal:1,empno:-1}) #先按照sal升序排列，如果遇到相同的sal，则按empno降序排列
+
+#注意：skip,limit,sort可以以任意的顺序调用，最终的结果都是先调sort，再调skip，最后调limit
+
+#5.设置查询结果的投影，即只过滤出自己想要的字段
+db.emp.find({},{ename:1,_id:0}) #在匹配到的文档中只显示ename字段
+
+
+
 
 
 ```
@@ -187,6 +209,10 @@ db.users.update({username:'liu'},{$push:{"hobby.movies":'movie4'}})
 db.users.update({username:'liu'},{$addToSet:{"hobby.movies":'movie4'}})
 
 
+# 5.自增自减操作符$inc
+{$inc:{num:100}} #让num自增100
+{$inc:{num:-100}} #让num自减100
+db.emp.updateMany({sal:{$lt:1000}},{$inc:{sal:400}}) #给工资低于1000的员工增加400的工资
 
 ```
 
@@ -240,26 +266,97 @@ db.orders.insert([
 ])
 
 查询liu1的所有订单：
-首先获取liu1的id: var user_id=db.users.find({name:'liu1'});
+首先获取liu1的id: var user_id=db.users.findOne({name:'liu1'})._id;
 根据id从订单集合中查询对应的订单： db.orders.find({user_id:user_id})
 
 ```
 
 多对多
 
+```shell
+#老师与学生
+db.teachers.insert([
+    {
+        _id:100,
+        name:'liu1'
+    },
+    {
+        _id:101,
+        name:'liu2'
+    },
+    {
+    	_id:102,
+    	name:'liu3'
+    }
+])
+
+db.students.insert([
+	{
+		_id:1000,
+		name:'xiao',
+		tech_ids:[100,101]
+	},
+	{
+		_id:1001,
+		name:'xiao2',
+		tech_ids:[102]
+	}
+])
+```
 
 
 
 
 
+## mongoose:
+
+mongoose是nodejs中的专门用于操作mongodb数据库的js库
 
 
 
+### mongoose中的对象：
+
+- Schema  模式对象
+  - 用于约束文档的结构
+- Model  模型对象
+  - 即mongodb中的集合
+- Document  文档对象
+  - 即mongodb中的文档
 
 
 
+### 安装：
+
+```shell
+npm i -s mongoose
+```
 
 
+
+### 基本使用：
+
+```js
+// 1.引入mongoose
+const mongooes = require("mongoose");
+// 2.连接mongodb数据库
+mongooes.connect("mongodb://localhost/users", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+// 3.监听mongodb数据库的连接状态
+// 绑定数据库连接成功事件
+mongooes.connection.once("open", function () {
+    console.log("连接成功");
+});
+// 绑定数据库连接失败事件
+mongooes.connection.once("close", function () {
+    console.log("数据库连接已经断开");
+});
+
+// 4.断开数据库连接(一般不用)
+mongooes.disconnect();
+```
 
 
 

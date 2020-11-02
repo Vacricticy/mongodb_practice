@@ -1,0 +1,23 @@
+{
+  "name": "mongodb_practice",
+  "version": "1.0.0",
+  "description": "- [官网](https://www.mongodb.com/try/download/community)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vacricticy/mongodb_practice.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vacricticy/mongodb_practice/issues"
+  },
+  "homepage": "https://github.com/Vacricticy/mongodb_practice#readme",
+  "dependencies": {
+    "mongoose": "^5.10.11"
+  }
+}
