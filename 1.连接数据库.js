@@ -1,7 +1,7 @@
 // 1.引入mongoose
 const mongooes = require("mongoose");
 // 2.连接mongodb数据库
-mongooes.connect("mongodb://localhost/users", {
+mongooes.connect("mongodb://localhost/mongooes_test", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -17,4 +17,6 @@ mongooes.connection.once("close", function () {
 });
 
 // 4.断开数据库连接(一般不用)
-mongooes.disconnect();
+// mongooes.disconnect();
+
+module.exports = mongooes;
