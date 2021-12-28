@@ -369,7 +369,8 @@ const stuSchema=new Schema({
     address:String
 })
 //创建模型对象
-const StuModel=mongooes.model("student",stuSchema); //第一个参数表示创建的集合的名称，第二个参数表示利用的模式对象
+// if you have imported mongoose as mongooes, then you can update with mongooes
+const StuModel=mongoose.model("student",stuSchema); //第一个参数表示创建的集合的名称，第二个参数表示利用的模式对象
 ```
 
 
